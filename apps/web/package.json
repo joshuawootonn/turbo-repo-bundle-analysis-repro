@@ -35,5 +35,12 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "typescript": "5.5.4"
+  },
+  "nextBundleAnalysis": {
+    "budget": 358400,
+    "budgetPercentIncreaseRed": 20,
+    "minimumChangeThreshold": 512,
+    "showDetails": false,
+    "skipCommentIfEmpty": false
   }
 }
