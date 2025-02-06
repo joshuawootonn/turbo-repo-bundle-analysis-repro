@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 defaults:
@@ -45,7 +45,7 @@ jobs:
         run: pnpm turbo run build --filter=web
 
       - name: Analyze bundle
-        run: node ./scripts/report-bundle-size.js
+        run: npx @makeswift/nextjs-bundle-diff@latest analyze --rootDirectory=.
         working-directory: ./apps/web
 
       - name: Upload bundle
@@ -64,14 +64,15 @@ jobs:
 
       - name: Compare with base branch bundle
         if: success() && github.event.number
-        run: ls -laR ./apps/web/.next/analyze/base && npx -p nextjs-bundle-analysis compare
+        run: ls -laR ./.next/analyze/base && npx @makeswift/nextjs-bundle-diff@latest compare --rootDirectory=. --fileA=./.next/analyze/base/__bundle_analysis.json --fileB=./.next/analyze/__bundle_analysis.json
+        working-directory: ./apps/web
 
       - name: Get Comment Body
         id: get-comment-body
         if: success() && github.event.number
         run: |
           echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat ./apps/web/.next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
+          echo "$(cat ./apps/web/.next/analyze/__bundle_comparison_comment.txt)" >> $GITHUB_OUTPUT
           echo EOF >> $GITHUB_OUTPUT
 
       - name: Find Comment
@@ -80,7 +81,7 @@ jobs:
         id: fc
         with:
           issue-number: ${{ github.event.number }}
-          body-includes: '<!-- __NEXTJS_BUNDLE -->'
+          body-includes: '<!-- __NEXTJS_BUNDLE_DIFF -->'
 
       - name: Create Comment
         uses: peter-evans/create-or-update-comment@v2
